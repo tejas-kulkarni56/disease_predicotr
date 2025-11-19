@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Disease Prediction + Medical Chatbot</title>
+
+    <style>
+        body {
+            font-family: Arial;
+            display: flex;
+            gap: 30px;
+            padding: 30px;
+            background: #f2f2f2;
+        }
+        .box {
+            width: 50%;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px #ccc;
+        }
+        #chatWindow {
+            height: 350px;
+            border: 1px solid #ddd;
+            padding: 10px;
+            overflow-y: auto;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            background: #fafafa;
+        }
+        .msg-user {
+            text-align: right;
+            background: #d1e6ff;
+            padding: 8px;
+            border-radius: 6px;
+            margin: 5px 0;
+        }
+        .msg-bot {
+            text-align: left;
+            background: #e8e8e8;
+            padding: 8px;
+            border-radius: 6px;
+            margin: 5px 0;
+        }
+        button {
+            padding: 10px 15px;
+            margin-top: 10px;
+            cursor: pointer;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+        }
+        button:hover {
+            background: #005fcc;
+        }
+    </style>
+
+    <script>
+        // ----------------- DISEASE PREDICTION -----------------
+        function predictDisease() {
+            let text = document.getElementById("symptoms").value;
+
+            fetch("/predict", {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: "symptoms=" + encodeURIComponent(text)
+            })
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById("result").innerHTML =
+                    "<h3>Predicted Disease: <span style='color:#007bff'>" + data.prediction + "</span></h3>";
+            });
+        }
+
+        // ----------------- CHATBOT -----------------
+        function sendMessage() {
+            let msg = document.getElementById("user_msg").value;
+            if (msg.trim() === "") return;
+
+            document.getElementById("chatWindow").innerHTML +=
+                `<p class="msg-user">${msg}</p>`;
+
+            fetch("/chat_api", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ message: msg })
+            })
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById("chatWindow").innerHTML +=
+                    `<p class="msg-bot">${data.reply}</p>`;
+                document.getElementById("user_msg").value = "";
+                document.getElementById("chatWindow").scrollTop =
+                    document.getElementById("chatWindow").scrollHeight;
+            })
+            .catch(err => {
+                document.getElementById("chatWindow").innerHTML +=
+                    `<p class="msg-bot" style="color:red">Error: ${err}</p>`;
+            });
+        }
+    </script>
+</head>
+
+<body>
+
+    <!-- LEFT SIDE : DISEASE PREDICTION -->
+    <div class="box">
+        <h2>Disease Prediction</h2>
+
+        <textarea id="symptoms" rows="5" style="width:100%; padding:10px;" placeholder="Enter symptoms..."></textarea>
+
+        <button onclick="predictDisease()">Predict Disease</button>
+
+        <div id="result"></div>
+    </div>
+
+
+    <!-- RIGHT SIDE : MEDICAL CHATBOT -->
+    <div class="box">
+        <h2>Medical Chatbot</h2>
+
+        <div id="chatWindow"></div>
+
+        <input type="text" id="user_msg" placeholder="Ask a health question..."
+               style="width:75%; padding:10px; border-radius:6px; border:1px solid #ccc;">
+
+        <button onclick="sendMessage()">Send</button>
+    </div>
+
+</body>
+</html>
