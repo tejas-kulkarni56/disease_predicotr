@@ -10,7 +10,7 @@ le = joblib.load("model/label_encoder.pkl")
 nn_model = load_model("model/nn_model.h5")
 
 # OpenAI Client
-client = OpenAI(api_key="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")
+client = OpenAI(api_key="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")
 
 app = Flask(__name__)
 
@@ -60,3 +60,4 @@ def chat_api():
 
 if __name__ == "__main__":
     app.run(debug=True)
+
